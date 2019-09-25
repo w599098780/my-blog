@@ -4,10 +4,42 @@ const swig=require('swig')
 const app=express();
  //记载数据库模块
 const mongoose =require('mongoose')
+const User=require('./models/User.js')
+
+//加载body-parser,用来处理post提交的数据
+const bodyParser = require('body-parser');
+//加载cookies模块
+const Cookies=require('cookies')
+//bodyParser 配置
+app.use(bodyParser.urlencoded({extended:true}))
+app.use(bodyParser.json())
+
+//设置cookie
+
+app.use((req,res,next)=>{
+    req.cookies=new Cookies(req,res);
+    //解析用户的登录信息
+    req.userInfo={}
+    if(req.cookies.get('userInfo')){
+        try{
+            req.userInfo=JSON.parse(req.cookies.get('userInfo'))
+            User.findById(req.userInfo.id).then((user)=>{
+                req.userInfo.isAdmin=Boolean(user.isAdmin)
+            })
+
+            next()
+        }catch(e){
+            next()
+        }
+    }else{
+        next()
+    }
+  
+
+})
 
 //设置静态文件托管
 app.use('/public',express.static(__dirname+'/public'));
-
 //配置应用模板
 //定义当前应用多使用的模板引擎
 //第一个参数：模板引擎的名称，同时也是模板文件的后缀，第二个参数表示用于解析处理模板内容的方法
@@ -43,7 +75,9 @@ mongoose.connect('mongodb://localhost:27018/blog',(err)=>{
         console.log('数据库连接失败')
     }else{
         console.log('数据库连接成功')
-        app.listen(9000)
+        app.listen(8888,()=>{
+            console.log('正在监听8888端口')
+        })
     }
 })
 
