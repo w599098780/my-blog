@@ -4,7 +4,7 @@ const swig=require('swig')
 const app=express();
  //记载数据库模块
 const mongoose =require('mongoose')
-const User=require('./models/User.js')
+const User=require('./models/User')
 
 //加载body-parser,用来处理post提交的数据
 const bodyParser = require('body-parser');
@@ -23,18 +23,18 @@ app.use((req,res,next)=>{
     if(req.cookies.get('userInfo')){
         try{
             req.userInfo=JSON.parse(req.cookies.get('userInfo'))
-            User.findById(req.userInfo.id).then((user)=>{
-                req.userInfo.isAdmin=Boolean(user.isAdmin)
+            User.findById(req.userInfo.id).then((userInfo)=>{
+                req.userInfo.isAdmin=Boolean(userInfo.isAdmin)
+                next()
+            
             })
-
-            next()
+         
         }catch(e){
             next()
         }
     }else{
         next()
     }
-  
 
 })
 
@@ -56,12 +56,6 @@ swig.setDefaults({cache:false})
 // res response对象
 // next 函数
 
-// app.get('/',function(req,res,next){
-//     // res.send('<h1>欢迎光临我的博客</h1>')
-//     //读取views目录下的指定文件，解析并返回给客户端
-//     //第一个参数表示模板文件，第二个参数：传递给模板使用的数据
-//     res.render('index')
-// })
 
 
 //根据不同的功能划分模块
